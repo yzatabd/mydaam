@@ -137,7 +137,10 @@ function group(list, key) {
   list.forEach(r => { const g = m.get(r[key]) || { q: 0, r: 0 }; g.q += +r.quantity; g.r += +r.returned; m.set(r[key], g); });
   return [...m].sort((x, y) => y[1].q - x[1].q);
 }
-
+function dateColor(d) {
+  const h = (Math.floor(Date.parse(d) / 864e5) * 47) % 360;
+  return { bg: `hsl(${h} 70% 93%)`, bar: `hsl(${h} 55% 50%)` };
+}
 function render() {
   const list = filtered();
   const q = list.reduce((s, r) => s + +r.quantity, 0), ret = list.reduce((s, r) => s + +r.returned, 0);
@@ -159,7 +162,7 @@ function render() {
   if (tab === 'detail') {
     const head = ['Дата','Магазин','Продукт','Агент'];
     $('table').innerHTML = `<table><tr>${head.map(h => `<th>${h}</th>`).join('')}<th class="n">Привезли</th><th class="n">Вернули</th></tr>` +
-      list.slice(0, 300).map(r => `<tr><td>${esc(r.delivery_date)}</td><td>${esc(r.store_name)}</td><td>${esc(r.product_name)}</td><td>${esc(r.agent_name)}</td><td class="n">${fmt(r.quantity)}</td><td class="n">${fmt(r.returned)}</td></tr>`).join('') +
+      list.slice(0, 300).map(r => { const c = dateColor(r.delivery_date); return `<tr style="background:${c.bg}"><td style="box-shadow:inset 4px 0 0 ${c.bar}">${esc(r.delivery_date)}</td><td>${esc(r.store_name)}</td><td>${esc(r.product_name)}</td><td>${esc(r.agent_name)}</td><td class="n">${fmt(r.quantity)}</td><td class="n">${fmt(r.returned)}</td></tr>`; }).join('') +
       '</table>' + (list.length > 300 ? `<div class="empty">Показаны первые 300 из ${list.length} строк. Сузьте фильтры, чтобы увидеть остальные.</div>` : '');
   } else {
     const name = TABS.find(t => t[0] === tab)[1];
